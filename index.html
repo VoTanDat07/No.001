@@ -1,0 +1,1137 @@
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#080808">
+<title>A Secret for Chups — Tdatt</title>
+
+<style>
+:root {
+  --bg: #080808;
+  --white: #f8f6f0;
+  --muted: #a7a7a7;
+  --line: rgba(255,255,255,.19);
+}
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100svh;
+  background: radial-gradient(ellipse at 50% 35%,
+    #242424 0%, #101010 38%, #050505 78%);
+  color: var(--white);
+  font-family: "Times New Roman", Georgia, serif;
+  overflow-x: hidden;
+  font-kerning: normal;
+  font-variant-ligatures: normal;
+  letter-spacing: normal;
+}
+
+button, input { font: inherit; }
+button { -webkit-tap-highlight-color: transparent; }
+
+button:focus-visible, input:focus-visible {
+  outline: 2px solid white;
+  outline-offset: 4px;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.noise {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: .12;
+  z-index: 0;
+  background-image: repeating-linear-gradient(
+    0deg, transparent 0 3px,
+    rgba(255,255,255,.025) 4px);
+}
+
+.light {
+  position: fixed;
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  left: 50%;
+  top: 38%;
+  transform: translate(-50%, -50%);
+  background: rgba(255,255,255,.07);
+  filter: blur(65px);
+  pointer-events: none;
+  transition: opacity 1s, transform 1s;
+}
+
+main {
+  position: relative;
+  z-index: 1;
+  width: min(100% - 32px, 560px);
+  min-height: 100vh;
+  min-height: 100svh;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 0;
+  text-align: center;
+}
+
+.screen {
+  width: 100%;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  animation: appear .9s ease both;
+}
+
+.screen.active { display: flex; }
+
+.eyebrow {
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+  letter-spacing: 3px;
+  line-height: 1.8;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+h1, h2, p { margin-top: 0; }
+
+h1 {
+  font-weight: 400;
+  font-size: clamp(34px, 9vw, 57px);
+  line-height: 1.08;
+  letter-spacing: 1px;
+  margin: 28px 0 20px;
+}
+
+h2 {
+  font-size: clamp(28px, 7vw, 43px);
+  font-weight: 400;
+  line-height: 1.2;
+  margin: 22px 0;
+}
+
+p {
+  color: #c9c9c9;
+  font-size: 16px;
+  line-height: 1.9;
+  word-spacing: normal;
+  overflow-wrap: break-word;
+}
+
+.rule {
+  width: 48px;
+  height: 1px;
+  background: rgba(255,255,255,.55);
+  margin: 22px auto;
+}
+
+.small {
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+  color: #999;
+  letter-spacing: 1.5px;
+  line-height: 1.9;
+}
+
+.btn {
+  margin-top: 25px;
+  min-height: 48px;
+  padding: 13px 22px;
+  border: 1px solid rgba(255,255,255,.65);
+  background: transparent;
+  color: white;
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  transition: background .3s, color .3s, transform .3s;
+}
+
+.btn:hover { background: white; color: black; }
+.btn:active { transform: scale(.97); }
+.btn:disabled { opacity: .45; cursor: default; }
+
+/* LÁ BÀI */
+
+.card-scene {
+  perspective: 1000px;
+  width: 164px;
+  height: 238px;
+  margin: 28px auto 12px;
+}
+
+.playing-card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  transition: transform .9s cubic-bezier(.2,.7,.2,1);
+  animation: float 3s ease-in-out infinite;
+}
+
+.playing-card.flipped {
+  transform: rotateY(180deg);
+  animation: none;
+}
+
+.face {
+  position: absolute;
+  inset: 0;
+  border: 1px solid #e8e8e8;
+  border-radius: 7px;
+  background: #f7f5ef;
+  color: #101010;
+  backface-visibility: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px;
+  box-shadow: 0 0 35px rgba(255,255,255,.08);
+}
+
+.face.back {
+  transform: rotateY(180deg);
+  background: repeating-linear-gradient(
+    45deg, #101010 0 5px, #1c1c1c 5px 7px);
+  color: white;
+  border: 5px double #f4f0e7;
+}
+
+.corner {
+  width: 100%;
+  text-align: left;
+  font-size: 17px;
+  line-height: 1.1;
+}
+
+.corner.bottom {
+  text-align: right;
+  transform: rotate(180deg);
+}
+
+.spade { font-size: 94px; line-height: 1; }
+
+.card-back-mark {
+  width: 100px;
+  height: 150px;
+  border: 1px solid rgba(255,255,255,.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 65px;
+}
+
+.tap-count {
+  margin-top: 12px;
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: #aaa;
+}
+
+/* PHONG THƯ VÀ LỜI NHẮN */
+
+.envelope {
+  width: min(100%, 320px);
+  min-height: 170px;
+  margin: 24px auto;
+  position: relative;
+  border: 1px solid rgba(255,255,255,.5);
+  display: grid;
+  place-items: center;
+  background: linear-gradient(145deg, #1b1b1b, #080808);
+  box-shadow: 0 0 40px rgba(255,255,255,.035);
+}
+
+.seal {
+  width: 62px;
+  height: 62px;
+  border: 1px solid white;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 28px;
+  transition: transform .5s, opacity .5s;
+}
+
+.envelope.open .seal {
+  transform: scale(1.7) rotate(20deg);
+  opacity: 0;
+}
+
+.letter {
+  width: 100%;
+  text-align: left;
+  border: 1px solid var(--line);
+  padding: clamp(20px, 6vw, 36px);
+  margin-top: 25px;
+  background: rgba(255,255,255,.025);
+}
+
+.letter p {
+  color: #e0e0e0;
+  font-size: 16px;
+  margin-bottom: 17px;
+}
+
+.letter .signature {
+  text-align: right;
+  font-size: 25px;
+  font-style: italic;
+  margin-top: 28px;
+  color: white;
+}
+
+.reveal-line {
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity .8s ease, transform .8s ease;
+}
+
+.reveal-line.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* MÀN HÌNH SINH NHẬT */
+
+.final-title {
+  font-size: clamp(36px, 10vw, 64px);
+  letter-spacing: 2px;
+  text-shadow: 0 0 35px rgba(255,255,255,.25);
+}
+
+.footer {
+  margin-top: 35px;
+  font-family: Arial, sans-serif;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: #777;
+}
+
+/* MANH MỐI NO. 001 */
+
+.transmission-footer {
+  margin-top: 35px;
+  margin-bottom: 0;
+  font-family: Arial, sans-serif;
+  font-size: 9px;
+  letter-spacing: 2px;
+  line-height: 2;
+  color: #777;
+}
+
+#secretTrigger {
+  display: inline-block;
+  border: 0;
+  padding: 4px 2px;
+  margin: -4px -2px;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  cursor: default;
+  transition:
+    color 1s ease,
+    text-shadow 1s ease,
+    transform .8s ease;
+}
+
+#secretTrigger:focus-visible {
+  outline: 1px solid rgba(255,255,255,.65);
+  outline-offset: 4px;
+}
+
+#secretTrigger.secret-glow {
+  color: #fff;
+  cursor: pointer;
+  text-shadow:
+    0 0 5px rgba(255,255,255,.65),
+    0 0 12px rgba(255,255,255,.4);
+  animation: secretPulse 2.5s ease-in-out infinite;
+}
+
+#secretHint {
+  max-width: 300px;
+  margin: 12px auto 0;
+  color: #aaa;
+  font-size: 12px;
+  line-height: 1.8;
+  animation: hintAppear 1.5s ease both;
+}
+
+/* PHẦN 7: LỜI NHẮN ẨN */
+
+.secret-page {
+  width: 100%;
+  text-align: center;
+}
+
+.secret-page .secret-message {
+  width: 100%;
+  margin-top: 25px;
+  padding: clamp(20px, 6vw, 34px);
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,.025);
+  text-align: left;
+}
+
+.secret-message p {
+  color: #e0e0e0;
+  margin-bottom: 20px;
+  line-height: 1.9;
+}
+
+.secret-message p:last-child {
+  margin-bottom: 0;
+}
+
+.secret-signature {
+  width: 100%;
+  margin-top: 25px;
+  font-size: 25px;
+  font-style: italic;
+  text-align: right;
+}
+
+.secret-end {
+  margin-top: 25px;
+  font-family: Arial, sans-serif;
+  font-size: 9px;
+  line-height: 2;
+  letter-spacing: 2px;
+  color: #777;
+}
+
+.flash {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  background: white;
+  opacity: 0;
+}
+
+.flash.go { animation: flash .8s ease; }
+
+.spark {
+  position: fixed;
+  z-index: 2;
+  pointer-events: none;
+  color: white;
+  animation: sparkle 1.5s ease-out forwards;
+}
+
+@keyframes appear {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float {
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -8px; }
+}
+
+@keyframes flash {
+  0% { opacity: 0; }
+  30% { opacity: .8; }
+  100% { opacity: 0; }
+}
+
+@keyframes sparkle {
+  from { opacity: 0; transform: translateY(0) scale(.5); }
+  20% { opacity: 1; }
+  to { opacity: 0; transform: translateY(-70px) scale(1.5); }
+}
+
+@keyframes secretPulse {
+  0%, 100% {
+    opacity: .65;
+    text-shadow: 0 0 3px rgba(255,255,255,.3);
+  }
+  50% {
+    opacity: 1;
+    text-shadow:
+      0 0 6px rgba(255,255,255,.8),
+      0 0 16px rgba(255,255,255,.5);
+  }
+}
+
+@keyframes hintAppear {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 380px) {
+  main { width: calc(100% - 24px); padding: 30px 0; }
+  .card-scene { width: 145px; height: 215px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+  }
+}
+</style>
+</head>
+
+<body>
+<div class="noise"></div>
+<div class="light" id="light"></div>
+<div class="flash" id="flash"></div>
+
+<main>
+
+  <!-- MÀN 1: LỜI MỜI BÍ MẬT -->
+  <section class="screen active" id="screen1">
+    <div class="eyebrow">Private transmission · No. 001</div>
+
+    <h1>A SECRET<br>FOR YOU</h1>
+
+    <div class="rule"></div>
+
+    <p>
+      Có một điều mình đã chuẩn bị.<br>
+      Nhưng mình sẽ không tiết lộ ngay đâu.
+    </p>
+
+    <p class="small">Một bí mật nhỏ, chỉ dành riêng cho Chups.</p>
+
+    <p class="small">
+      Mọi bí mật đều bắt đầu từ một dấu vết.
+    </p>
+
+    <button class="btn" id="startBtn">NHẬN MẬT LỆNH ↗</button>
+
+    <div class="footer">FROM AN UNKNOWN MAGICIAN</div>
+  </section>
+
+  <!-- MÀN 2: LÁ BÀI -->
+  <section class="screen" id="screen2">
+    <div class="eyebrow">Stage 01 · The chosen card</div>
+
+    <h2>Mọi bí mật đều<br>bắt đầu từ một lá bài.</h2>
+
+    <p class="small">Chạm vào lá bài để khám phá mặt còn lại.</p>
+
+    <div class="card-scene">
+      <button class="playing-card" id="playingCard"
+        aria-label="Lật lá bài bí mật">
+        <span class="face front">
+          <span class="corner">A<br>♠</span>
+          <span class="spade">♠</span>
+          <span class="corner bottom">A<br>♠</span>
+        </span>
+
+        <span class="face back">
+          <span class="card-back-mark">T</span>
+          <span class="small" style="color:white">
+            YOUR SPECIAL DAY
+          </span>
+          <span class="small" style="color:white">
+            NO. 001
+          </span>
+        </span>
+      </button>
+    </div>
+
+    <div class="tap-count" id="cardHint">ONE CARD · ONE SECRET</div>
+
+    <p class="small">
+      Đôi khi, điều quan trọng nhất lại nằm ở chi tiết nhỏ nhất.
+    </p>
+
+    <button class="btn" id="unlockBtn" hidden>
+      TIẾP TỤC MỞ KHÓA ↗
+    </button>
+  </section>
+
+  <!-- MÀN 3: DẪN VÀO CÂU ĐỐ -->
+  <section class="screen" id="screen3">
+    <div class="eyebrow">Stage 02 · A little mystery</div>
+
+    <h2>Đã tìm thấy<br>điều bí mật.</h2>
+
+    <div class="rule"></div>
+
+    <p>
+      Có một ngày đặc biệt mà mình không muốn
+      để nó trôi qua như bao ngày bình thường khác.
+    </p>
+
+    <p class="small">
+      Tìm thấy một bí mật không có nghĩa là đã tìm thấy tất cả.
+    </p>
+
+    <p class="small">NHƯNG MỘT CÁNH CỬA VẪN CHƯA MỞ...</p>
+
+    <button class="btn" id="letterBtn">
+      TÌM CHÌA KHÓA ♠
+    </button>
+  </section>
+
+  <!-- MÀN 4: MẬT MÃ NGÀY SINH -->
+  <section class="screen" id="screenCode">
+    <div class="eyebrow">Stage 03 · Identity verification</div>
+
+    <h2>THE FINAL<br>CODE</h2>
+
+    <div class="rule"></div>
+
+    <p style="font-style:italic">
+      “Ngày thế giới đón chào nhân vật chính
+      của câu chuyện này…”
+    </p>
+
+    <p class="small">MANH MỐI 01 · THE DAY IT ALL BEGAN</p>
+
+    <p>
+      Mọi câu chuyện đều có một khởi đầu.
+      Hãy tìm ngày đặc biệt đã mở ra câu chuyện của bạn.
+    </p>
+
+    <p class="small">MẬT MÃ GỒM NGÀY · THÁNG · NĂM</p>
+
+    <form id="birthdayForm" style="width:100%;max-width:320px">
+      <input
+        id="birthdayCode"
+        type="password"
+        inputmode="numeric"
+        autocomplete="off"
+        maxlength="8"
+        pattern="[0-9]{8}"
+        placeholder="Nhập mật mã của bạn"
+        aria-label="Mật mã bí mật"
+        required
+        style="
+          width:100%;
+          padding:16px 12px;
+          margin-top:18px;
+          text-align:center;
+          color:white;
+          background:#111;
+          border:1px solid #777;
+          font-size:18px;
+          letter-spacing:2px;
+          border-radius:0;
+        "
+      >
+
+      <button class="btn" type="submit">
+        UNLOCK THE SECRET ♠
+      </button>
+
+      <p id="codeMessage" class="small"
+         role="status" aria-live="polite"
+         style="min-height:44px;margin-top:15px"></p>
+    </form>
+
+    <!-- GỢI Ý THỨ HAI: SAU 3 LẦN SAI -->
+    <div id="hintBox" hidden style="margin-top:20px;width:100%">
+      <div class="rule"></div>
+
+      <p class="small">A MESSAGE FROM THE MAGICIAN</p>
+
+      <p id="hintText">
+        Nhà ảo thuật có một manh mối dành riêng cho bạn.
+      </p>
+
+      <div class="card-scene" style="width:110px;height:160px">
+        <button type="button" class="playing-card" id="hintCard"
+          aria-label="Lật lá bài để xem gợi ý thứ hai">
+
+          <span class="face front">
+            <span class="corner">A<br>♠</span>
+            <span class="spade" style="font-size:65px">♠</span>
+            <span class="corner bottom">A<br>♠</span>
+          </span>
+
+          <span class="face back">
+            <span class="card-back-mark"
+              style="width:65px;height:95px;font-size:40px">?</span>
+            <span class="small" style="color:white">ONE CLUE</span>
+          </span>
+        </button>
+      </div>
+
+      <p id="hintReveal" hidden>
+        Hãy nhớ ngày bạn cất tiếng khóc chào đời.
+        Ghép ngày, tháng và năm theo đúng thứ tự.
+      </p>
+    </div>
+  </section>
+
+  <!-- MÀN 5: PHONG THƯ -->
+  <section class="screen" id="screen4">
+    <div class="eyebrow">Stage 04 · Just for you</div>
+
+    <h2>Một lời nhắn<br>được giữ lại cho bạn.</h2>
+
+    <div class="envelope" id="envelope">
+      <div class="seal">♠</div>
+    </div>
+
+    <button class="btn" id="openLetterBtn">MỞ LỜI NHẮN</button>
+
+    <article class="letter" id="letter" hidden>
+      <p class="reveal-line">Gửi Chups,</p>
+
+      <p class="reveal-line">
+        Chúc mừng sinh nhật Chups nhé!
+      </p>
+
+      <p class="reveal-line">
+        Mong tuổi mới sẽ mang đến cho Chups thật nhiều niềm vui,
+        những người chân thành và những ngày bình yên.
+      </p>
+
+      <p class="reveal-line">
+        Mình không biết món quà này có khiến Chups bất ngờ không,
+        nhưng mình đã muốn làm một điều gì đó khác biệt,
+        để ngày đặc biệt của Chups có thêm một kỷ niệm nhỏ.
+      </p>
+
+      <p class="reveal-line">
+        Cảm ơn vì đã là chính mình.
+        Mong rằng khi nhìn lại hôm nay, Chups sẽ có một lý do
+        để mỉm cười.
+      </p>
+
+      <p class="reveal-line">
+        Có những điều chỉ xuất hiện khi ta chịu nhìn lại.
+      </p>
+
+      <p class="reveal-line">
+        Và này, đừng vội rời đi nhé.
+        Màn ảo thuật vẫn còn một điều cuối cùng.
+      </p>
+
+      <p class="signature reveal-line">— Tdatt</p>
+    </article>
+
+    <button class="btn" id="finalBtn" hidden>
+      TIẾT LỘ CUỐI CÙNG ✦
+    </button>
+  </section>
+
+  <!-- MÀN 6: KẾT THÚC SINH NHẬT -->
+  <section class="screen" id="screen5">
+    <div class="eyebrow">The final reveal</div>
+
+    <div class="spade" style="font-size:50px">♠</div>
+
+    <h1 class="final-title">HAPPY<br>BIRTHDAY</h1>
+
+    <div class="rule"></div>
+
+    <p>
+      Chúc Chups có một ngày thật đẹp.<br>
+      Và mong những điều tốt đẹp cũng sẽ<br>
+      tìm đến Chups trong cả những ngày bình thường.
+    </p>
+
+    <p class="small">Món quà nhỏ này được chuẩn bị dành riêng cho Chups.</p>
+
+    <div style="font-size:28px;font-style:italic">— Tdatt</div>
+
+    <p class="transmission-footer">
+      END OF TRANSMISSION ·
+      <button
+        id="secretTrigger"
+        type="button"
+        aria-label="NO. 001"
+        title="Transmission reference"
+      >NO. 001</button>
+    </p>
+
+    <p id="secretHint" hidden>
+      Có vẻ như vẫn còn một điều chưa được gửi đi...
+    </p>
+
+    <button class="btn" id="replayBtn">XEM LẠI BÍ MẬT ↻</button>
+  </section>
+
+  <!-- MÀN 7: LỜI NHẮN ẨN -->
+  <section class="screen" id="screen7">
+    <div class="secret-page">
+      <div class="eyebrow">Transmission 002 · Unsealed</div>
+
+      <div class="spade" style="font-size:45px;margin-top:20px">♠</div>
+
+      <h2>A MESSAGE<br>LEFT BEHIND.</h2>
+
+      <p class="small">
+        Hóa ra, điều còn thiếu chính là lời nhắn này.
+      </p>
+
+      <div class="rule"></div>
+
+      <article class="secret-message">
+        <p>Gửi Chups,</p>
+
+        <p>
+          Nếu Chups đã tìm thấy nơi này, vậy thì mình nghĩ
+          đã đến lúc gửi đi điều mà mình chưa nói hết.
+        </p>
+
+        <p>
+          Trước hết, chúc Chups có một tuổi mới thật vui vẻ.
+          Mong rằng những điều tốt đẹp sẽ đến với bạn,
+          cả trong những ngày đặc biệt lẫn những ngày bình thường.
+        </p>
+
+        <p>
+          Mình biết phía trước Chups còn một kỳ thi quan trọng.
+          Mong Chups sẽ đủ tự tin, kiên trì và bình tĩnh
+          để vượt qua kỳ thi THPTQG thật tốt.
+        </p>
+
+        <p>
+          Mình hy vọng Chups sẽ đỗ vào ngôi trường mà bạn mong muốn,
+          được học ngành mình thật sự yêu thích
+          và có cơ hội bước đến cuộc sống mà bạn vẫn luôn hướng tới.
+        </p>
+
+        <p>
+          Dù kết quả thế nào, hãy nhớ rằng hành trình ấy là của chính Chups.
+          Cứ cố gắng hết sức, từng bước một,
+          và đừng quên chăm sóc bản thân trong lúc theo đuổi ước mơ nhé.
+        </p>
+
+        <p>
+          Còn về tấm thẻ này, hãy giữ nó cẩn thận nhé.
+          Nếu một ngày nào đó Chups có thể tự tay trả lại nó cho mình,
+          có lẽ đó sẽ là lúc một câu chuyện khác được bắt đầu.
+        </p>
+
+        <p>
+          Biết đâu sau những con đường riêng của mỗi người,
+          chúng ta lại có duyên gặp nhau một lần nữa.
+          Mình thật sự hy vọng sẽ có ngày như vậy.
+        </p>
+
+        <p>
+          Và nếu ngày ấy đến, mình sẽ chuẩn bị một phần thưởng
+          đặc biệt dành cho Chups.
+          Còn phần thưởng đó là gì...
+        </p>
+
+        <p>
+          <strong>
+            Mình xin phép giữ bí mật đến phút cuối.
+          </strong>
+        </p>
+      </article>
+
+      <p class="secret-signature">— Tdatt</p>
+
+      <p class="secret-end">
+        TRANSMISSION 002 · MESSAGE DELIVERED<br>
+        Câu chuyện vẫn có thể tiếp tục.
+      </p>
+
+      <button class="btn" id="replaySecretBtn">
+        QUAY LẠI TỪ ĐẦU ↻
+      </button>
+    </div>
+  </section>
+
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+/* MẬT MÃ SINH NHẬT: DDMMYYYY */
+const BIRTHDAY_CODE = "20112009";
+
+let cardOpened = false;
+let letterOpened = false;
+let wrongAttempts = 0;
+let hintCardFlipped = false;
+let secretTimer = null;
+
+/* CHUYỂN MÀN HÌNH */
+function showScreen(number) {
+  document.querySelectorAll(".screen").forEach((screen) => {
+    screen.classList.remove("active");
+  });
+
+  $("screen" + number)?.classList.add("active");
+
+  if (number === "Code") {
+    $("screenCode").classList.add("active");
+  }
+
+  /* Dừng bộ đếm nếu rời màn hình sinh nhật */
+  if (String(number) !== "5") {
+    clearTimeout(secretTimer);
+    secretTimer = null;
+  }
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+
+  $("light").style.transform =
+    number === 5 || number === 7
+      ? "translate(-50%, -50%) scale(1.6)"
+      : "translate(-50%, -50%) scale(1)";
+}
+
+/* HIỆU ỨNG */
+function flash() {
+  const element = $("flash");
+  element.classList.remove("go");
+  void element.offsetWidth;
+  element.classList.add("go");
+}
+
+function makeSparkles(amount = 16) {
+  for (let i = 0; i < amount; i++) {
+    const spark = document.createElement("span");
+    spark.className = "spark";
+    spark.textContent = Math.random() > 0.5 ? "✦" : "·";
+    spark.style.left = (8 + Math.random() * 84) + "vw";
+    spark.style.top = (30 + Math.random() * 50) + "vh";
+    spark.style.fontSize = (10 + Math.random() * 16) + "px";
+    document.body.appendChild(spark);
+    setTimeout(() => spark.remove(), 1600);
+  }
+}
+
+function delay(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+function openCodeScreen() {
+  $("birthdayCode").value = "";
+  $("codeMessage").textContent = "";
+  showScreen("Code");
+}
+
+/* BỘ ĐẾM 20 GIÂY CHO MANH MỐI NO. 001 */
+function startSecretTimer() {
+  clearTimeout(secretTimer);
+
+  $("secretTrigger").classList.remove("secret-glow");
+  $("secretHint").hidden = true;
+
+  secretTimer = setTimeout(() => {
+    /* Chỉ hé lộ nếu màn hình sinh nhật vẫn đang mở */
+    if (!$("screen5").classList.contains("active")) return;
+
+    $("secretTrigger").classList.add("secret-glow");
+    $("secretHint").hidden = false;
+  }, 10000);
+}
+
+/* MÀN 1 */
+$("startBtn").addEventListener("click", () => {
+  flash();
+  setTimeout(() => showScreen(2), 250);
+});
+
+/* MÀN 2: LẬT LÁ BÀI */
+$("playingCard").addEventListener("click", () => {
+  if (cardOpened) return;
+
+  cardOpened = true;
+  $("playingCard").classList.add("flipped");
+  $("cardHint").textContent = "SECRET FOUND · ACCESS GRANTED";
+
+  makeSparkles(12);
+  flash();
+
+  $("unlockBtn").hidden = false;
+});
+
+$("unlockBtn").addEventListener("click", () => {
+  flash();
+  setTimeout(() => showScreen(3), 250);
+});
+
+/* MÀN 3: ĐI TÌM CHÌA KHÓA */
+$("letterBtn").addEventListener("click", () => {
+  flash();
+  setTimeout(openCodeScreen, 250);
+});
+
+/* MẬT MÃ NGÀY SINH */
+$("birthdayForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  const entered = $("birthdayCode").value.trim();
+
+  if (entered === BIRTHDAY_CODE) {
+    $("codeMessage").textContent =
+      "ACCESS GRANTED · SECRET UNLOCKED";
+    $("codeMessage").style.color = "#fff";
+
+    flash();
+    makeSparkles(24);
+
+    setTimeout(() => showScreen(4), 900);
+    return;
+  }
+
+  wrongAttempts++;
+
+  $("codeMessage").textContent =
+    wrongAttempts < 3
+      ? "Mật mã chưa chính xác. Hãy thử lại nhé."
+      : "Nhà ảo thuật có vẻ nên để lại một manh mối...";
+  $("codeMessage").style.color = "#c9c9c9";
+
+  $("birthdayCode").value = "";
+
+  if (wrongAttempts >= 3) {
+    $("hintBox").hidden = false;
+
+    $("hintText").textContent =
+      "Hãy nghĩ về ngày mà nhân vật chính của câu chuyện này cất tiếng khóc chào đời.";
+
+    flash();
+    makeSparkles(15);
+
+    $("hintBox").scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+  }
+});
+
+/* LẬT LÁ BÀI GỢI Ý */
+$("hintCard").addEventListener("click", () => {
+  if (hintCardFlipped) return;
+
+  hintCardFlipped = true;
+  $("hintCard").classList.add("flipped");
+  $("hintReveal").hidden = false;
+
+  flash();
+  makeSparkles(12);
+});
+
+/* MỞ PHONG THƯ */
+$("openLetterBtn").addEventListener("click", async () => {
+  if (letterOpened) return;
+
+  letterOpened = true;
+  $("openLetterBtn").disabled = true;
+  $("envelope").classList.add("open");
+
+  flash();
+  makeSparkles(18);
+
+  await delay(650);
+
+  $("letter").hidden = false;
+
+  const lines = [...document.querySelectorAll("#letter .reveal-line")];
+
+  for (const line of lines) {
+    await delay(850);
+    line.classList.add("show");
+  }
+
+  $("finalBtn").hidden = false;
+  $("finalBtn").scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+  });
+});
+
+/* MÀN 6: KẾT THÚC SINH NHẬT */
+$("finalBtn").addEventListener("click", () => {
+  flash();
+  makeSparkles(30);
+
+  setTimeout(() => {
+    showScreen(5);
+    startSecretTimer();
+  }, 400);
+});
+
+/* NHẤN NO. 001 ĐỂ MỞ PHẦN 7 */
+function openHiddenMessage() {
+  clearTimeout(secretTimer);
+  secretTimer = null;
+
+  flash();
+  makeSparkles(24);
+
+  setTimeout(() => showScreen(7), 400);
+}
+
+$("secretTrigger").addEventListener("click", openHiddenMessage);
+
+
+/* HỖ TRỢ PHÍM ENTER VÀ SPACE */
+$("secretTrigger").addEventListener("keydown", (event) => {
+  if (event.key === "Enter" || event.key === " ") {
+    event.preventDefault();
+    openHiddenMessage();
+  }
+});
+
+/* ĐẶT LẠI TRẠNG THÁI VÀ QUAY VỀ ĐẦU */
+function replayFromBeginning() {
+  clearTimeout(secretTimer);
+  secretTimer = null;
+
+  cardOpened = false;
+  letterOpened = false;
+  wrongAttempts = 0;
+  hintCardFlipped = false;
+
+  $("playingCard").classList.remove("flipped");
+  $("cardHint").textContent = "ONE CARD · ONE SECRET";
+  $("unlockBtn").hidden = true;
+
+  $("hintBox").hidden = true;
+  $("hintCard").classList.remove("flipped");
+  $("hintReveal").hidden = true;
+  $("hintText").textContent =
+    "Nhà ảo thuật có một manh mối dành riêng cho bạn.";
+
+  $("birthdayCode").value = "";
+  $("codeMessage").textContent = "";
+
+  $("envelope").classList.remove("open");
+  $("letter").hidden = true;
+
+  $("letter").querySelectorAll(".reveal-line").forEach(line => {
+    line.classList.remove("show");
+  });
+
+  $("openLetterBtn").disabled = false;
+  $("finalBtn").hidden = true;
+
+  $("secretTrigger").classList.remove("secret-glow");
+  $("secretHint").hidden = true;
+
+  showScreen(1);
+}
+
+$("replayBtn").addEventListener("click", replayFromBeginning);
+$("replaySecretBtn").addEventListener("click", replayFromBeginning);
+</script>
+</body>
+</html>
